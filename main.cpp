@@ -1,21 +1,17 @@
 /*
- * final_main.cpp: OpenGL/GLUT C/C++ Setup graphics project
- * To compile with -lfreeglut -lglu32 -lopengl32
+ * ECE6122 Project
+ * Author: 
  */
 
-//http://www3.ntu.edu.sg/home/ehchua/programming/opengl/cg_introduction.html -> main reference
-
 //#include <windows.h>  // for MS Windows
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <fstream>
-#include<stdlib.h>
-#include<stdio.h>
-
-#include "math.h"
-#include<time.h>
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include <GL/gl.h>
 #include <GL/glut.h>  // GLUT, include glu.h and gl.h
 #include <GL/glu.h>
@@ -36,37 +32,37 @@ sq *snake = NULL;
 
 neural *net;
 
-int num_layers   =      2;
-int num_inputs   =      6;
-int num_outputs  =      1;
+int num_layers = 2;
+int num_inputs = 6;
+int num_outputs = 1;
 
-float learning_rate     = 0.0000001;
+float learning_rate = 1e-7;
 
 //bool  pus        =  false; //push button for keyboard hit
 
-int iterations   =      0;
+int iterations = 0;
 
-int	  exploration_rate  = 	     40;
+int	  exploration_rate = 40;
 
-int food_x       =     -6;
-int food_y       =     -6;
+int food_x = -6;
+int food_y = -6;
 
 int mx;
 int my;
 
-int   fail_count =      0;
-int sc           =      0;
+int fail_count = 0;
+int sc = 0;
 
-float old_q      =    0.0;
+float old_q = 0.0;
 
-int tmp          =     50;
+int tmp = 50;
 
 //int wa,ha;
 
 //int SCREENH=(25*30),SCREENW=(25*50);
 //int SCREENH=450,SCREENW=450;
 
-bool down=false;
+bool down = false;
 
 int key1 = 3;
 
@@ -75,7 +71,7 @@ bool neural_check = false;
 int dir;
 
 int Scale = 25;
-int N = 50,M = 30;
+int N = 50, M = 30;
 int SCREENW = Scale * N;
 int SCREENH = Scale * M;
 
@@ -85,9 +81,9 @@ char sScore[15];
 char sSpeed[15];
 int Score = 0;
 
-void drawString(float x,float y,float z,void *font,char *string)
+void drawString(float x,float y,float z,void *font,const char *string)
 {
-	char *c;
+	const char *c;
 	glRasterPos3f(x, y,z); //Specifies the raster position for pixel operations.
 
 	for (c=string; *c != '\0'; c++)
@@ -244,16 +240,6 @@ float max_q(int sx, int sy, int food_x, int food_y){
 				}
 			}
 		}
-        /*
-        if 1>2,
-            1>3,
-                1>4 set new_q to out1
-                    if mx=-1 rev()
-                    else mx=1,my=0
-                else set new_q to out4 and others
-            else if 3>4 set new_q to out3 and others
-            else set new_q to out4 and others
-        */
 	}else{
 		if(out2[0] > out3[0]){
 			if(out2[0] > out4[0]){
@@ -385,8 +371,8 @@ void Tick(){
 			sy1 = sy + 1;
 			if(my == -1) rev();
 			else{
-				mx =  0;
-				my =  1;
+				mx = 0;
+				my = 1;
 			}
             break;
         case 1:
@@ -395,7 +381,7 @@ void Tick(){
 			if(mx == 1) rev();
 			else{
 				mx = -1;
-				my =  0;
+				my = 0;
 			}
             break;
         case 2:
@@ -403,8 +389,8 @@ void Tick(){
 			sy1 = sy;
 			if(mx == -1) rev();
 			else{
-				mx =  1;
-				my =  0;
+				mx = 1;
+				my = 0;
 			}
             break;
         case 3:
@@ -412,7 +398,7 @@ void Tick(){
 			sy1 = sy - 1;
 			if(my == 1) rev();
 			else{
-				mx =  0;
+				mx = 0;
 				my = -1;
 			}
             break;
@@ -744,6 +730,24 @@ void display(){
 	glutSwapBuffers(); //Swap front- and back framebuffer
 }
 
+/* Callback handler for special-key event */
+void specialKeyboard(int key, int a, int b) {
+	switch(key) {
+		case GLUT_KEY_UP:
+			dir = 0;
+			break;
+		case GLUT_KEY_RIGHT:
+			dir = 2;
+			break;
+		case GLUT_KEY_LEFT:
+			dir = 1;
+			break;
+		case GLUT_KEY_DOWN:
+			dir = 3;
+			break;
+	}
+}
+
 /* Callback handler for normal-key event */
 void keyboard(unsigned char key, int a, int b) {
 	switch (key) {
@@ -872,6 +876,7 @@ int main(int argc, char** argv){
 	glutTimerFunc (400,timer,0);     // First timer call immediately
 	glutReshapeFunc(myReshape);       // Register callback handler for window re-size event
     glutKeyboardFunc(keyboard);   // Register callback handler for special-key event
+	glutSpecialFunc(specialKeyboard);
 	glutMouseFunc(mouse);   // Register callback handler for mouse event
 
 	glutDisplayFunc(display); // Register display callback handler for window re-paint
