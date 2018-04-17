@@ -531,7 +531,7 @@ void DrawRules(){
 		drawString(23,41,0,GLUT_BITMAP_HELVETICA_18,"  Neural;initializes net neural with default values");
 		drawString(23,37,0,GLUT_BITMAP_HELVETICA_18,"  User;takes kbhit to fetch values ");
 		drawString(23,33,0,GLUT_BITMAP_HELVETICA_18,"  Food comes in random and if snake hits it's body or border:restart");
-		drawString(38,27,0,GLUT_BITMAP_HELVETICA_18," ENJOY THE GAME");
+		drawString(38,27,0,GLUT_BITMAP_HELVETICA_18," ENJOY PLAYING THE GAME");
 
 		glutPostRedisplay(); //marks the current window as needing to be redisplayed
 }
