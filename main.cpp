@@ -29,7 +29,7 @@ typedef struct sq{
 } sq;
 
 sq *snake = NULL;
-
+sq *snake0 = NULL;
 neural *net;
 
 int num_layers = 2;
@@ -47,15 +47,24 @@ int	  exploration_rate = 40;
 int food_x = -6;
 int food_y = -6;
 
+int food_x2 = -6;
+int food_y2 = -6;
+
+
 int mx;
 int my;
+int mx0;
+int my0;
 
 int fail_count = 0;
 int sc = 0;
+int fail_count0 = 0;
+int sc0 = 0;
 
 float old_q = 0.0;
-
+float old_q0 = 0.0;
 int tmp = 50;
+int tmp0 = 50;
 
 //int wa,ha;
 
@@ -69,6 +78,7 @@ int key1 = 3;
 bool neural_check = false;
 
 int dir;
+int dir_user;
 
 int Scale = 25;
 int N = 50, M = 30;
@@ -78,8 +88,10 @@ int SCREENH = Scale * M;
 int num = 7;
 
 char sScore[15];
+char sScore0[15];
 char sSpeed[15];
 int Score = 0;
+int Score0 = 0;
 
 void drawString(float x,float y,float z,void *font,const char *string)
 {
@@ -108,6 +120,16 @@ void add(int x, int y){
 	snake = tmp;
 }
 
+void add0(int x, int y){
+	sq *tmp0 = (sq *)malloc(sizeof(sq)); // Start sq snake tmp with Memory Allocation
+	tmp0 -> x = x;
+	tmp0 -> y = y;
+	tmp0 -> mx = 1;
+	tmp0 -> my = 0;
+	tmp0 -> nexploration_ratet = snake0;
+	snake0 = tmp0;
+}
+
 void start(){
 	snake = NULL;
     add(0, 0);
@@ -119,21 +141,70 @@ void start(){
 	my = 0;
 }
 
+void start0(){
+	snake0 = NULL;
+    add0(0, 0);
+	add0(1, 0);
+	add0(2, 0);
+	add0(3, 0);
+	add0(4, 0);
+	mx0 = 1;
+	my0 = 0;
+}
+
+
+
 void set_f(){ //Setup food x,y cordinate and then make the snake p to move towards it's cordinate
+	bool f = true;
+	while(f){
+		srand(time(NULL));
+		food_x2 = (rand() % 34) - 17;
+		srand(time(NULL));
+		food_y2 = (rand() % 34) - 17;
+		
+		//food_x2 = food_x;
+		//food_y2 = food_y;
+
+		sq *p = snake; //take add(4,0) value
+
+		while(p != NULL){ //fetch null 
+			if(p -> x == food_x2 && p -> y == food_y2){ //if value of p is same as food
+				f = true;
+				break;
+			}
+			f = false;
+			p = p -> nexploration_ratet;
+		}
+
+		// sq *p2 = snake0; //take add(4,0) value
+		
+		// while(p2 != NULL){ //fetch null 
+		// 	if(p2 -> x == food_x2 && p2 -> y == food_y2){ //if value of p is same as food
+		// 		f = true;
+		// 		break;
+		// 	}
+		// 	f = false;
+		// 	p2 = p2 -> nexploration_ratet;
+		// }
+	}
+}
+
+void set_f0(){ //Setup food x,y cordinate and then make the snake p to move towards it's cordinate
 	bool f = true;
 	while(f){
 		srand(time(NULL));
 		food_x = (rand() % 34) - 17;
 		srand(time(NULL));
 		food_y = (rand() % 34) - 17;
-		sq *p = snake; //take add(4,0) value
-		while(p != NULL){ //fetch null 
-			if(p -> x == food_x && p -> y == food_y){ //if value of p is same as food
+
+		sq *p2 = snake0; //take add(4,0) value
+		while(p2 != NULL){ //fetch null 
+			if(p2 -> x == food_x && p2 -> y == food_y){ //if value of p is same as food
 				f = true;
 				break;
 			}
 			f = false;
-			p = p -> nexploration_ratet;
+			p2 = p2 -> nexploration_ratet;
 		}
 	}
 }
@@ -156,8 +227,8 @@ float check(int x, int y){
 
 float *get_q(int sx, int sy){
 	float inputs[6];
-	inputs[0] = sqrt((sx - food_x) * (sx - food_x) + (sy - food_y) * (sy - food_y)); // Root (x)^2 + (y)^2
-	inputs[1] = check(sx	, sy	); //Check no increment
+	inputs[0] = sqrt((sx - food_x2) * (sx - food_x2) + (sy - food_y2) * (sy - food_y2)); // Root (x)^2 + (y)^2
+	inputs[1] = check(sx	, sy	); // no increment
 	inputs[2] = check(sx + 1, sy	); //Check x increment
 	inputs[3] = check(sx    , sy + 1); //Check y increment
 	inputs[4] = check(sx - 1, sy); //Check x decrement
@@ -183,6 +254,26 @@ void rev(){
 	snake = snake2;
 	mx = snake -> mx;
 	my = snake -> my;
+}
+
+void rev0(){
+	sq *snake3 = NULL;
+	sq *p = snake0;
+	while(p != NULL){
+		sq *tmp0 = (sq *)malloc(sizeof(sq));
+		tmp0 -> x = p -> x;
+		tmp0 -> y = p -> y;
+		tmp0 -> mx = -1 * p -> mx; //reverse case of mx by multiplying -1
+		tmp0 -> my = -1 * p -> my; //reverse case of mx by multiplying -1
+		tmp0 -> nexploration_ratet = snake3; //nexploration_ratet to snake2
+		snake3 = tmp0;
+		sq *x = p -> nexploration_ratet;
+		free(p); //Memory Unallocate of P
+		p = x; //put p=x
+	}
+	snake0 = snake3;
+	mx0 = snake0 -> mx;
+	my0 = snake0 -> my;
 }
 
 float max_q(int sx, int sy, int food_x, int food_y){
@@ -312,6 +403,40 @@ void move(){
     // Setup increment case from x to mx within nexploration_ratet
 }
 
+void move0(){
+	sq *p = snake0;
+	int x = p -> x;
+	int y = p -> y;
+	int tmx = p -> mx;
+	int tmy = p -> my;
+	while(p -> nexploration_ratet != NULL){
+		sq *q = p -> nexploration_ratet;
+		int tmp = q -> x;
+		q -> x = x;
+		x = tmp;
+
+		tmp = q -> y;
+		q -> y = y;
+		y = tmp;
+
+		tmp = q -> mx;
+		q -> mx = tmx;
+		tmx = tmp;
+
+		tmp = q -> my;
+		q -> my = tmy;
+		tmy = tmp;
+
+		p = p -> nexploration_ratet;
+	}
+	snake0 -> mx = mx0;
+	snake0 -> my = my0;
+	snake0 -> x += mx0; //Add with mx value depending un up down left right movement
+	snake0 -> y += my0;
+    // Setup increment case from x to mx within nexploration_ratet
+}
+
+
 bool tail(){
 	sq *p = snake;
     //tail is touched by head
@@ -323,21 +448,32 @@ bool tail(){
 	return false;
 }
 
+bool tail0(){
+	sq *p = snake0;
+    //tail is touched by head
+	while(p -> nexploration_ratet != NULL){
+		if(p -> nexploration_ratet -> x == snake0 -> x && p -> nexploration_ratet -> y == snake0 -> y)
+			return true;
+		p = p -> nexploration_ratet;
+	}
+	return false;
+}
+
 float reward(int sx, int sy, int sx1, int sy1){
-	if(snake -> x == food_x && snake -> y == food_y){
-		if (neural_check){
+	if(snake -> x == food_x2 && snake -> y == food_y2){
+		//if (neural_check){
 			fail_count = 0;
 			exploration_rate = exploration_rate / 3; //Rate decrement by 1/3 from 40%
-		}
-		add(food_x, food_y);//Add value to tail with additional quad
+		//}
+		add(food_x2, food_y2);//Add value to tail with additional quad
 		set_f();
 		sc++; //Increment sc by 1
 		return 1000.0;
 	}else if(tail()){
-			if (neural_check){
+			//if (neural_check){
 				fail_count = 0;
 				fail_count++;
-		}
+		//}
 		sc = 0;
 		start(); //restart
 		return -100000.0;
@@ -352,64 +488,97 @@ float reward(int sx, int sy, int sx1, int sy1){
         //decrease exploration_rate for hish fail_count
 		exploration_rate = 20;
 	}
+	float re2 = sqrt((sx1 - food_x2) * (sx1 - food_x2) + (sy1 - food_y2) * (sy1 - food_y2)); //Root. (x)^2 + (y)^2
+	return -re2;
+}
+
+float reward0(int sx, int sy, int sx1, int sy1){
+	if(snake0 -> x == food_x && snake0 -> y == food_y){
+		// if (neural_check){
+		// 	fail_count = 0;
+		// 	exploration_rate = exploration_rate / 3; //Rate decrement by 1/3 from 40%
+		// }
+		add0(food_x, food_y);//Add value to tail with additional quad
+		set_f0();
+		sc0++; //Increment sc by 1
+		return 1000.0;
+	}else if(tail0()){
+		// 	if (neural_check){
+		// 		fail_count = 0;
+		// 		fail_count++;
+		// }
+		sc0 = 0;
+		start0(); //restart
+		return -100000.0;
+	}else if(snake0 -> x > 17 || snake0 -> x < -17 || snake0 -> y > 17 || snake0 -> y < -17){
+		//border hit
+		sc0 = 0;
+        start0();
+		fail_count0++;
+		return -1000.0;
+	}
+	if(fail_count0 > 50){
+        //decrease exploration_rate for hish fail_count
+		exploration_rate = 20;
+	}
 	float re2 = sqrt((sx1 - food_x) * (sx1 - food_x) + (sy1 - food_y) * (sy1 - food_y)); //Root. (x)^2 + (y)^2
 	return -re2;
 }
 
 void Tick(){
 	iterations++; //Increment iterations
-    int sx = snake -> x;
-	int sy = snake -> y;
+    int sx = snake0 -> x;
+	int sy = snake0 -> y;
 
 	int sx1 = sx;
 	int sy1 = sy;
 
     //Snake head movement:
-    switch (dir) {
+    switch (dir_user) {
         case 0:
             sx1 = sx;
 			sy1 = sy + 1;
-			if(my == -1) rev();
+			if(my0 == -1) rev0();
 			else{
-				mx = 0;
-				my = 1;
+				mx0 = 0;
+				my0 = 1;
 			}
             break;
         case 1:
             sx1 = sx - 1;
 			sy1 = sy;
-			if(mx == 1) rev();
+			if(mx0 == 1) rev0();
 			else{
-				mx = -1;
-				my = 0;
+				mx0 = -1;
+				my0 = 0;
 			}
             break;
         case 2:
             sx1 = sx + 1;
 			sy1 = sy;
-			if(mx == -1) rev();
+			if(mx0 == -1) rev0();
 			else{
-				mx = 1;
-				my = 0;
+				mx0 = 1;
+				my0 = 0;
 			}
             break;
         case 3:
             sx1 = sx;
 			sy1 = sy - 1;
-			if(my == 1) rev();
+			if(my0 == 1) rev0();
 			else{
-				mx = 0;
-				my = -1;
+				mx0 = 0;
+				my0 = -1;
 			}
             break;
     }
 
-    move();
+    move0();
 
-    sx1 = snake -> x; //takes the sx1 to snake value
-	sy1 = snake -> y;
+    sx1 = snake0 -> x; //takes the sx1 to snake value
+	sy1 = snake0 -> y;
 
-	float re = reward(sx, sy, sx1, sy1);
+	float re = reward0(sx, sy, sx1, sy1);
 }
 
 void itera(){
@@ -423,7 +592,7 @@ void itera(){
 
 	float new_q;
 	if(rand() % 100 > exploration_rate){
-		new_q = max_q(sx, sy, food_x, food_y);
+		new_q = max_q(sx, sy, food_x2, food_y2);
 	}else{
 		int a = rand() % 4;
         // same as in max_q
@@ -479,26 +648,66 @@ void itera(){
 }
 
 void par(float x1, float x2, float y1, float y2, float z1, float z2){
-	glColor3f(0.3,0.56,0.84); //Blue
+	//glColor3f(0.3,0.56,0.84); //Blue
 
 	glBegin(GL_POLYGON); // Each set of 4 vertices form a quad from polygon
 
+	glColor3f(1.0,1.0,0.0);
 	glVertex3f(x1, y1, z1); // 3 GLfloat parameters
+	glColor3f(1.0,1.0,0.0);
 	glVertex3f(x2, y1, z1);
+	glColor3f(0.0,0.0,1.0);
 	glVertex3f(x2, y2, z1);
+	glColor3f(0.0,0.0,1.0);
+	glVertex3f(x1, y2, z1);
+
+	glEnd(); //Gl end
+}
+
+void parfood(float x1, float x2, float y1, float y2, float z1, float z2){
+	//glColor3f(0.3,0.56,0.84); //Blue
+
+	glBegin(GL_POLYGON); // Each set of 4 vertices form a quad from polygon
+
+	glColor3f(0.5,0.5,0.5);
+	glVertex3f(x1, y1, z1); // 3 GLfloat parameters
+	glColor3f(0.5,0.5,0.5);
+	glVertex3f(x2, y1, z1);
+	glColor3f(0.5,0.5,0.5);
+	glVertex3f(x2, y2, z1);
+	glColor3f(0.5,0.5,0.5);
+	glVertex3f(x1, y2, z1);
+
+	glEnd(); //Gl end
+}
+
+void parb(float x1, float x2, float y1, float y2, float z1, float z2){
+	//glColor3f(0.3,0.56,0.84); //Blue
+
+	glBegin(GL_POLYGON); // Each set of 4 vertices form a quad from polygon
+
+	glColor3f(0.0,0.0,0.0);
+	glVertex3f(x1, y1, z1); // 3 GLfloat parameters
+	glColor3f(0.0,0.0,0.0);
+	glVertex3f(x2, y1, z1);
+	glColor3f(0.0,0.0,0.0);
+	glVertex3f(x2, y2, z1);
+	glColor3f(0.0,0.0,0.0);
 	glVertex3f(x1, y2, z1);
 
 	glEnd(); //Gl end
 }
 
 void DrawRules(){
-		glColor3f(0.3,0.56,0.84);   // background
+		//glColor3f(0.3,0.56,0.84);   // background
+        glColor3f(0.0,0.0,0.0);
 
 		glBegin(GL_POLYGON);
 		glVertex3f(0.0,0.0,0.0);
-		glColor3f(0.137,0.137,0.556);
+		//glColor3f(0.137,0.137,0.556);
+		glColor3f(0.0,0.0,0.0);
 		glVertex3f(100.0,0.0,0.0);
-		glColor3f(0.196,0.196,0.8);
+		glColor3f(0.0,0.4,0.0);
 		glVertex3f(100.0,100.0,0.0);
 		glVertex3f(0.0,100.0,0.0);
 		glEnd();
@@ -507,88 +716,95 @@ void DrawRules(){
 		glScalef(0.8,0.8,0); //multiply the current matrix by a general scaling matrix
 		glPopMatrix();  // Restore the model-view matrix
 
-		glColor3f(0.137,0.137,0.556);
+		glColor3f(0.4,0.6,0.4);
 		glRectf(20.0,20.0,80.0,80.0); //draw a rectangle
 		glColor3f(0.8,0.8,0.8);
 		glRectf(21.0,21.0,79.0,79.0);
-		glColor3f(0.196,0.196,0.8);
+		glColor3f(0.4,0.6,0.4);
 		glRectf(40,5,60,10);
 		glColor3f(0.8,0.8,0.8);
 		glRectf(40.5,5.5,59.5,9.5);
 
-		glColor3f(0.137,0.137,0.556);
+		glColor3f(0.0,0.4,0.0);
 		drawString(46,6,0,GLUT_BITMAP_TIMES_ROMAN_24,"BACK");
 
-		glColor3f(0.137,0.137,0.556);
-		drawString(42,75,0,GLUT_BITMAP_TIMES_ROMAN_24,"HOW TO PLAY:");
-		drawString(23,69,0,GLUT_BITMAP_HELVETICA_18,"Choose any one of the options:");
-		drawString(23,65,0,GLUT_BITMAP_HELVETICA_18,"Menu:");
-		drawString(23,61,0,GLUT_BITMAP_HELVETICA_18,"- User: Use AWSD to move snake and add quad with food");
-		drawString(23,57,0,GLUT_BITMAP_HELVETICA_18,"- Play_neural: Sends neural Data");
-		drawString(23,53,0,GLUT_BITMAP_HELVETICA_18,"- How_to: reaches this screen");
-		drawString(23,49,0,GLUT_BITMAP_HELVETICA_18,"- Exit: Forwards: exit(0)");
-		drawString(23,45,0,GLUT_BITMAP_HELVETICA_18,"- The game sets up 1-4 polygons for head & tail of snake ");
-		drawString(23,41,0,GLUT_BITMAP_HELVETICA_18,"  Neural;initializes net neural with default values");
-		drawString(23,37,0,GLUT_BITMAP_HELVETICA_18,"  User;takes kbhit to fetch values ");
-		drawString(23,33,0,GLUT_BITMAP_HELVETICA_18,"  Food comes in random and if snake hits it's body or border:restart");
-		drawString(38,27,0,GLUT_BITMAP_HELVETICA_18," ENJOY PLAYING THE GAME");
+		glColor3f(0.0,0.4,0.0);
+		drawString(42,74,0,GLUT_BITMAP_TIMES_ROMAN_24,"HOW TO PLAY:");
+		drawString(23,68,0,GLUT_BITMAP_HELVETICA_18,"Click PLAY on the main menu to reach the game screen");
+		drawString(23,64,0,GLUT_BITMAP_HELVETICA_18,"Click INSTRUCTIONS on the main screen to reach this screen");
+		drawString(23,60,0,GLUT_BITMAP_HELVETICA_18,"Click QUIT on the main screen to exit the menu");
+		drawString(23,56,0,GLUT_BITMAP_HELVETICA_18,"After entering the game screen:");
+		drawString(23,52,0,GLUT_BITMAP_HELVETICA_18,"- The right window is neural AI player");
+		drawString(23,48,0,GLUT_BITMAP_HELVETICA_18,"- The left window is Human player");
+		drawString(23,44,0,GLUT_BITMAP_HELVETICA_18,"- Food is a grey spot which appears randomly on the screens");
+		drawString(23,40,0,GLUT_BITMAP_HELVETICA_18,"- If snake hits it's body or boundary:restart");
+		drawString(23,36,0,GLUT_BITMAP_HELVETICA_18,"- Use the arrow keys to control snake's movement");
+		drawString(23,32,0,GLUT_BITMAP_HELVETICA_18,"- AI vs Human, the higher score wins");
+		drawString(42,25,0,GLUT_BITMAP_HELVETICA_18," ENJOY THE GAME");
 
 		glutPostRedisplay(); //marks the current window as needing to be redisplayed
 }
 
 void welcome(){
 	glMatrixMode(GL_PROJECTION);
-	glColor3f(0.3,0.56,0.84);   //welcome background
+	//glColor3f(0.3,0.56,0.84);   //welcome background
+	glColor3f(0.0,0.0,0.0);
+
 	glBegin(GL_POLYGON);
 	glVertex3f(0.0,0.0,0.0);
-	glColor3f(0.137,0.137,0.556);
+	glColor3f(0.0,0.0,0.0);
 	glVertex3f(100.0,0.0,0.0);
-	glColor3f(0.196,0.196,0.8);
+	glColor3f(0.0,0.4,0.0);
 	glVertex3f(100.0,100.0,0.0);
 	glVertex3f(0.0,100.0,0.0);
 	glEnd();
 
 	// button 1 .. User
-	glColor3f(0.196,0.196,0.8);
+	glColor3f(0.4,0.6,0.4);
 	glRectf(39.5,39.5,60.5,45.5);
 
 	glColor3f(0.8,0.8,0.8);
 	glRectf(40,40,60,45);
-	glColor3f(0.137,0.137,0.556);
-	drawString(47,42,0,GLUT_BITMAP_HELVETICA_18,"USER");
+	glColor3f(0.0,0.2,0.0);
+	drawString(47,42,0,GLUT_BITMAP_HELVETICA_18,"PLAY");
 
-	// button 2 .. Network_play
-	glColor3f(0.196,0.196,0.8);
+	// // button 2 .. Network_play
+	// glColor3f(0.196,0.196,0.8);
+	// glRectf(39.5,29.5,60.5,35.5);
+
+	// glColor3f(0.8,0.8,0.8);
+	// glRectf(40,30,60,35);
+	// glColor3f(0.137,0.137,0.556);
+	// drawString(46,31,0,GLUT_BITMAP_HELVETICA_18,"NEURAL");
+
+	// button 3 .. How_to
+	glColor3f(0.4,0.6,0.4);  
 	glRectf(39.5,29.5,60.5,35.5);
 
 	glColor3f(0.8,0.8,0.8);
 	glRectf(40,30,60,35);
-	glColor3f(0.137,0.137,0.556);
-	drawString(46,31,0,GLUT_BITMAP_HELVETICA_18,"NEURAL");
-
-	// button 3 .. How_to
-	glColor3f(0.196,0.196,0.8);
-	glRectf(39.5,19.5,60.5,25.5);
-
-	glColor3f(0.8,0.8,0.8);
-	glRectf(40,20,60,25);
-	glColor3f(0.137,0.137,0.556);
-	drawString(47,21,0,GLUT_BITMAP_HELVETICA_18,"HOW?");
+	// glColor3f(0.137,0.137,0.556);
+	glColor3f(0.0,0.2,0.0);
+	drawString(44,32,0,GLUT_BITMAP_HELVETICA_18,"INSTRUCTIONS");
 
 	// button 4 .. exit
-	glColor3f(0.196,0.196,0.8);
-	glRectf(39.5,9.5,60.5,15.5);
+	// glColor3f(0.196,0.196,0.8);
+	glColor3f(0.4,0.6,0.4);  
+	glRectf(39.5,19.5,60.5,25.5);
 	glColor3f(0.8,0.8,0.8);
-	glRectf(40,10,60,15);
-	glColor3f(0.137,0.137,0.556);
-	drawString(47,11,0,GLUT_BITMAP_HELVETICA_18,"EXIT");
+	glRectf(40,20,60,25);
+	//glColor3f(0.137,0.137,0.556);
+	glColor3f(0.0,0.2,0.0);
+	drawString(47,22,0,GLUT_BITMAP_HELVETICA_18,"QUIT");
 
 
 	glPushMatrix(); // Save model-view matrix setting
 
-	glColor3f(0.8,0.8,0.8);
-	drawString(40,92,0,GLUT_BITMAP_TIMES_ROMAN_24,"GRAPHICS PROJECT ");
-	drawString(23,80,0,GLUT_BITMAP_TIMES_ROMAN_24,"Srijana: OpenGL based 2D Snake to play as user and neural network");
+	//glColor3f(0.8,0.8,0.8);
+	glColor3f(0.6,0.7,0.6); 
+	drawString(40,85,0,GLUT_BITMAP_TIMES_ROMAN_24,"ECE 6122 PROJECT ");
+	drawString(29,73,0,GLUT_BITMAP_TIMES_ROMAN_24,"SnakeBee: OpenGL based 2D Snake - Human vs AI");
+	drawString(20,64,0,GLUT_BITMAP_TIMES_ROMAN_24,"The Snake pattern is inspired by GaTechs own Buzz the Bee. Go Jackets!");
 	glPopMatrix();
 	glColor3f(0.137,0.137,0.556);
 
@@ -597,134 +813,218 @@ void welcome(){
 void DrawScore()
 {
 	glLineWidth(1.5f);
-    glColor3f (1.1,1.0,1.0);
+    glColor3f (1.0,1.0,1.0);
 
     glPushMatrix();
-    glTranslatef(SCREENW/(5.4), SCREENH/(1.05), 0);
+    glTranslatef(SCREENW/(18.4), SCREENH/(1.05), 0);
     glScalef(0.3f, 0.3f, 0.3f);
     draw_string(GLUT_STROKE_ROMAN, "Your score:");
     glPopMatrix();
 
-    sprintf(sScore, "%9d", sc);
+    sprintf(sScore, "%9d", sc0);
 
     glPushMatrix();
-    glTranslatef(SCREENW/5, SCREENH/(1.05), 0);
+    glTranslatef(SCREENW/18.3, SCREENH/(1.05), 0);
     glScalef(0.3f, 0.3f, 0.3f);
     draw_string(GLUT_STROKE_ROMAN, sScore);
     glPopMatrix();
 
 	glPushMatrix();
-    glTranslatef(SCREENW/(1.6), SCREENH/(1.05), 0);
+    glTranslatef(SCREENW/(2.45), SCREENH/(1.05), 0);
     glScalef(0.3f, 0.3f, 0.3f);
-    draw_string(GLUT_STROKE_ROMAN, "Your Speed:");
+    draw_string(GLUT_STROKE_ROMAN, "Speed:");
     glPopMatrix();
 
 	sprintf(sSpeed, "%d", tmp);
 
     glPushMatrix();
-    glTranslatef(SCREENW/(1.2), SCREENH/(1.05), 0);
+    glTranslatef(SCREENW/1.9, SCREENH/(1.05), 0);
     glScalef(0.3f, 0.3f, 0.3f);
     draw_string(GLUT_STROKE_ROMAN, sSpeed);
+    glPopMatrix();
+
+	glPushMatrix();
+    glTranslatef(SCREENW/(1.4), SCREENH/(1.05), 0);
+    glScalef(0.3f, 0.3f, 0.3f);
+    draw_string(GLUT_STROKE_ROMAN, "AI's score:");
+    glPopMatrix();
+
+    sprintf(sScore0, "%9d", sc);
+
+    glPushMatrix();
+    glTranslatef(SCREENW/1.45, SCREENH/(1.05), 0);
+    glScalef(0.3f, 0.3f, 0.3f);
+    draw_string(GLUT_STROKE_ROMAN, sScore0);
     glPopMatrix();
 
     glFinish();
 }
 
-void DrawNeural(){
+// void DrawNeural(){
 
+    
+// 	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
+// 	glLoadIdentity();
+// 	//SCREENW = SCREENW/(1.2);
+// 	//SCREENH = SCREENH/(1.05);
+// 	gluOrtho2D (0, SCREENW, 0, SCREENH);
+// 	glClear(GL_COLOR_BUFFER_BIT);
+
+// 	glBegin(GL_POLYGON);
+// 	glColor3f (0.0, 0.3, 0.0);
+// 	glVertex3f (0.0, 800.0, 0.0);
+// 	glColor3f (0.0, 0.11, 0.0);
+// 	glVertex3f (0, 700.0, 0.0);
+// 	glColor3f (0.0, 0.11, 0.0);
+// 	glVertex3f (1400.0, 700.0, 0.0);
+// 	glColor3f (0.0, 0.3, 0.0);
+// 	glVertex3f (1400.0, 800.0, 0.0);
+
+// 	glEnd();
+
+// 	DrawScore();
+
+// 	neural_check = true;
+
+// 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color buffer and depth buffer
+// 	glLoadIdentity ();
+// 	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
+// 	//gluLookAt(0.0, 0.0, 5.0,0.0, 0.0, 0.0,0.0, 1.0, 0.0); 
+
+// 	glTranslatef(-10.0, 0.0, -28.0); // Translate by -22 on z-axis
+// 	//glTranslatef(SCREENW/(2), SCREENH/(2), 0);
+// 	sq *p = snake;
+// 	par(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
+// 	par(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
+// 	par(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
+// 	par( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
+// 	while(p != NULL){
+// 		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+// 		p = p -> nexploration_ratet; //p reach null nexplorartion
+// 	}
+// 	par(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
+// }
+
+// void DrawUser(){
+	
+// 	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
+// 	glLoadIdentity();
+// 	gluOrtho2D (0, SCREENW, 0, SCREENH);
+// 	glClear(GL_COLOR_BUFFER_BIT);
+
+// 	glBegin(GL_POLYGON);
+// 	glColor3f (0.0, 0.3, 0.0);
+// 	glVertex3f (0.0, 800.0, 0.0);
+// 	glColor3f (0.0, 0.11, 0.0);
+// 	glVertex3f (0, 700.0, 0.0);
+// 	glColor3f (0.0, 0.11, 0.0);
+// 	glVertex3f (1400.0, 700.0, 0.0);
+// 	glColor3f (0.0, 0.3, 0.0);
+// 	glVertex3f (1400.0, 800.0, 0.0);
+
+// 	glEnd();
+
+// 	DrawScore();
+	
+// 	glLoadIdentity ();
+// 	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
+// 	glTranslatef(10.0, 0.0, -28.0); // Translate by -22 on z-axis
+	
+// 	sq *p = snake;
+// 	par(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
+// 	par(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
+// 	par(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
+// 	par( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
+
+// 	while(p != NULL){
+// 		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+// 		p = p -> nexploration_ratet; //p reach null nexplorartion
+// 	}
+// 	par(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
+// }
+
+void DrawPlay(){
+	
 	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
 	glLoadIdentity();
 	gluOrtho2D (0, SCREENW, 0, SCREENH);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_POLYGON);
-	glColor3f (0.0, 0.3, 0.0);
+	glColor3f (0.0, 0.0, 0.0);
 	glVertex3f (0.0, 800.0, 0.0);
-	glColor3f (0.0, 0.11, 0.0);
+	glColor3f (0.0, 0.0, 0.0);
 	glVertex3f (0, 700.0, 0.0);
-	glColor3f (0.0, 0.11, 0.0);
+	glColor3f (0.0, 0.0, 0.0);
 	glVertex3f (1400.0, 700.0, 0.0);
-	glColor3f (0.0, 0.3, 0.0);
+	glColor3f (0.0, 0.0, 0.0);
 	glVertex3f (1400.0, 800.0, 0.0);
 
 	glEnd();
 
 	DrawScore();
 
-	neural_check = true;
+	
+	glLoadIdentity ();
+	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
+	glTranslatef(-10.0, 0.0, -28.0); // Translate by -22 on z-axis
+	
+	
+	sq *p = snake0;
+	
+	parb(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
+	parb(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
+	parb(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
+	parb( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
+
+	while(p != NULL){
+		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+		p = p -> nexploration_ratet; //p reach null nexplorartion
+	}
+	parfood(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
+
+
+
+	//DrawScore();
 
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color buffer and depth buffer
 	glLoadIdentity ();
-	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
+    gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
 	//gluLookAt(0.0, 0.0, 5.0,0.0, 0.0, 0.0,0.0, 1.0, 0.0); 
 
-	glTranslatef(0.0, 0.0, -28.0); // Translate by -22 on z-axis
-	sq *p = snake;
-	par(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
-	par(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
-	par(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
-	par( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
-	while(p != NULL){
-		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
-		p = p -> nexploration_ratet; //p reach null nexplorartion
+	glTranslatef(9.3, 0.0, -28.0); // Translate by -22 on z-axis
+	sq *p2 = snake;
+	parb(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
+	parb(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
+	parb(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
+	parb( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
+	while(p2 != NULL){
+		par((p2 -> x)/2.0,(p2 -> x)/2.0 + 0.4,(p2 -> y)/2.0,(p2 -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+		p2 = p2 -> nexploration_ratet; //p reach null nexplorartion
 	}
-	par(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
-}
-
-void DrawUser(){
-	
-	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
-	glLoadIdentity();
-	gluOrtho2D (0, SCREENW, 0, SCREENH);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glBegin(GL_POLYGON);
-	glColor3f (0.0, 0.3, 0.0);
-	glVertex3f (0.0, 800.0, 0.0);
-	glColor3f (0.0, 0.11, 0.0);
-	glVertex3f (0, 700.0, 0.0);
-	glColor3f (0.0, 0.11, 0.0);
-	glVertex3f (1400.0, 700.0, 0.0);
-	glColor3f (0.0, 0.3, 0.0);
-	glVertex3f (1400.0, 800.0, 0.0);
-
-	glEnd();
-
-	DrawScore();
-	
-	glLoadIdentity ();
-	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
-	glTranslatef(0.0, 0.0, -28.0); // Translate by -22 on z-axis
-	
-	sq *p = snake;
-	par(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
-	par(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
-	par(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
-	par( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
-
-	while(p != NULL){
-		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
-		p = p -> nexploration_ratet; //p reach null nexplorartion
-	}
-	par(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
+	parfood(food_x2/2.0, food_x2/2.0 + 0.4 , food_y2/2.0 , food_y2/2.0 + 0.4, 0.0 , 0.0); //food decrement
 }
 
 void display(){
 
 	switch (key1)
     {
-        case 1:
-            DrawUser();
-            break;
-        case 2:
-            DrawNeural();
-            break;
+       // case 1:
+         //   DrawUser();
+           // break;
+       // case 2:
+         //   DrawNeural();
+           // break;
         case 3:
             welcome();
             break;
         case 4:
             DrawRules();
             break;
+		case 1:
+		    DrawPlay();
+            break;
+		
     }
     glFlush(); // Render now
 	glutSwapBuffers(); //Swap front- and back framebuffer
@@ -734,16 +1034,16 @@ void display(){
 void specialKeyboard(int key, int a, int b) {
 	switch(key) {
 		case GLUT_KEY_UP:
-			dir = 0;
+			dir_user = 0;
 			break;
 		case GLUT_KEY_RIGHT:
-			dir = 2;
+			dir_user = 2;
 			break;
 		case GLUT_KEY_LEFT:
-			dir = 1;
+			dir_user = 1;
 			break;
 		case GLUT_KEY_DOWN:
-			dir = 3;
+			dir_user = 3;
 			break;
 	}
 }
@@ -792,11 +1092,11 @@ void mouse(int button, int state, int ax, int ay)            // takes input from
     {
         if (key1==3) //welcome
         {
-            if(mx > (40) && mx < (60) && my > (10) && my < (15) ) //exit button
+            if(mx > (40) && mx < (60) && my > (20) && my < (25) )  //exit button
             {
                 exit(0);
             }
-            if(mx > (40) && mx < (60) && my > (20) && my < (25) ) //how_to
+            if(mx > (40) && mx < (60) && my > (30) && my < (35) ) //how_to
             {
                 glClear(GL_COLOR_BUFFER_BIT);
                 key1=4;
@@ -807,13 +1107,14 @@ void mouse(int button, int state, int ax, int ay)            // takes input from
                 key1 = 1;
                 num = 5;
                 Score = 0;
+				Score0 = 0;
                 display();
             }
-			if(mx > (40) && mx < (60) && my > (30) && my < (35) ) //neural_play
-            {
-                key1 = 2;
-                display();
-            }
+		//	if(mx > (40) && mx < (60) && my > (30) && my < (35) ) //neural_play
+          //  {
+            //    key1 = 2;
+             //   display();
+           // }
         }
         if (key1==4) //back option in instruction
         {
@@ -829,15 +1130,25 @@ void mouse(int button, int state, int ax, int ay)            // takes input from
 }
 
 void timer(int = 0){
-	if (key1==2){
-		itera();
-		cout << "iterations : " << iterations << " speed : " << tmp << " score : " << sc << endl;
+	if (key1==1){
+        itera();
+		//Tick();
+		//cout << "iterations : " << iterations << " speed : " << tmp << " score : " << sc << endl;
 	}
-	if (key1==1)
-		Tick();
+	// if (key1==2)
+	// 	Tick();
 		//cout << "speed : " << tmp << " score : " << sc << endl;
 	glutPostRedisplay(); //marks the current window as needing to be redisplayed
 	glutTimerFunc(tmp, timer, 0); //registers a timer callback to be triggered in a specified number of milliseconds
+}
+
+void timer2(int = 0){
+	if (key1==1){
+        Tick();
+		//cout << "speed : " << tmp << " score : " << sc << endl;
+	}
+	glutPostRedisplay(); //marks the current window as needing to be redisplayed
+	glutTimerFunc(tmp, timer2, 0); //registers a timer callback to be triggered in a specified number of milliseconds
 }
 
 void myReshape(int w, int h)
@@ -861,19 +1172,21 @@ int main(int argc, char** argv){
 	net -> init(); //reach neural_init
 
 	start(); //Start snake layout with initial values
-
+    start0();
     set_f(); //Setup food point cordinates
+	set_f0(); //Setup food point cordinates
 
     glutInit(&argc, argv); // Initialize GLUT
 
     glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH); // Use RGBA color, enable double buffering and enable depth buffer
     glutInitWindowSize (SCREENW,SCREENH);  // Set the window's initial width & height
     glutInitWindowPosition(500, 0); // Position the window's initial top-left corner
-    glutCreateWindow("Srijana: User and Neural Network game"); // Create a window with the given title
+    glutCreateWindow("SnakeBee: User and Neural Network game"); // Create a window with the given title
 
     init();
 
 	glutTimerFunc (400,timer,0);     // First timer call immediately
+	glutTimerFunc (400,timer2,0);
 	glutReshapeFunc(myReshape);       // Register callback handler for window re-size event
     glutKeyboardFunc(keyboard);   // Register callback handler for special-key event
 	glutSpecialFunc(specialKeyboard);
