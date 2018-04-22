@@ -46,7 +46,7 @@ neural :: neural(){
 
 neural :: neural(int in, int out, int num, int hn, float lrate){
     num_inputs = in;
-	num_outputs = out;
+	num_outputs = out; //Performance = num_outputs(3) > num_outputs(2) > num_outputs(4)  > num_outputs(1)
 	num_layers = num;
 	num_hid_nodes = hn;
 	num_weights = 0;
@@ -103,6 +103,21 @@ neural :: neural(int in, int out, int num, int hn, float lrate){
 
 }
 
+
+
+void neural :: put_weights(float *weights){
+	int n = 0;
+	for(int i = 0; i < num_layers; i++){
+		for(int j = 0; j < layers[i].num_nodes; j++){
+
+			for(int k = 0; k < (layers[i].chr[j]).num_inputs; k++){
+				(layers[i].chr[j]).weights[k] = weights[n]; //set weight_k ie num_inputs range for chr_j of layers_i to 1 to weight_n
+				n++; //N increment
+			}
+		}
+	}
+}
+
 void neural :: init(){
 	float weights[num_weights];
 	for(int i = 0; i < num_weights; i++){
@@ -113,19 +128,6 @@ void neural :: init(){
 		for(int j = 0; j < layers[i].num_nodes ; j++){
 			for(int k = 0; k < (layers[i].chr[j]).num_inputs; k++){	
 				(layers[i].chr[j]).weights[k] = 1; //set weight_k ie num_inputs range for chr_j of layers_i to 1
-			}
-		}
-	}
-}
-
-void neural :: put_weights(float *weights){
-	int n = 0;
-	for(int i = 0; i < num_layers; i++){
-		for(int j = 0; j < layers[i].num_nodes; j++){
-
-			for(int k = 0; k < (layers[i].chr[j]).num_inputs; k++){
-				(layers[i].chr[j]).weights[k] = weights[n]; //set weight_k ie num_inputs range for chr_j of layers_i to 1 to weight_n
-				n++; //N increment
 			}
 		}
 	}
@@ -190,7 +192,7 @@ float neural :: get_weighted_error(int l, int in){
 		float weight = (layers[l].chr[j]).weights[in];
 		sum += error * weight; 
 	}
-	return sum;
+	return sum; //Final cost
 }
 
 neural :: ~neural(){
