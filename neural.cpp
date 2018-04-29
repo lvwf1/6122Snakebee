@@ -2,6 +2,7 @@
 #include <math.h>
 #include <iostream>
 #include <cstdlib>
+#include <fstream>
 
 typedef struct node{
 	int num_inputs;
@@ -123,6 +124,17 @@ void neural :: init(){
 	for(int i = 0; i < num_weights; i++){
 		 weights[i] = (float)rand() / (float)RAND_MAX - 0.5; //Setup weight_i to rand variable by rand_max
 	}
+	ifstream infile;
+	infile.open("weights.txt");
+	if(infile) {
+		float w;
+		int n = 0;
+		while(!infile.eof()){
+			infile >> w;
+			weights[n++] = w;
+		}
+	}
+	infile.close();
 	put_weights(weights);
 	for(int i = num_layers - 2; i >= 0; i--){
 		for(int j = 0; j < layers[i].num_nodes ; j++){
@@ -183,6 +195,16 @@ void neural :: learn(float *dout){
 			}
 		}
 	}
+	/*ofstream outfile("weights.txt");
+	for(int i = 0; i < num_layers; i++){
+		for(int j = 0; j < layers[i].num_nodes; j++){
+			for(int k = 0; k < (layers[i].chr[j]).num_inputs; k++){
+				outfile << (layers[i].chr[j]).weights[k] << " "; 
+			}
+		}
+	}
+	outfile.close();*/
+	
 }
 
 float neural :: get_weighted_error(int l, int in){
