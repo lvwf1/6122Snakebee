@@ -10,7 +10,7 @@
  * SoundPlay.h
  *  1: Download [openal] Pack (Software implementation of the Snakebee API(devlopment files)) and [alut] Pack
  *  2：Add header path as：/usr/include/AL
- *  3: Add Source：openal和alut
+ *  3: Add Source：openal and alut
  */
 
 #include <al.h>
