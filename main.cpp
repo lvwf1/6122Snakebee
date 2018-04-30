@@ -50,6 +50,7 @@ int food_y = -6;
 int food_x2 = -6;
 int food_y2 = -6;
 
+int cnt = 0; // Check Body
 
 int mx;
 int my;
@@ -228,9 +229,12 @@ void init(){
 float check(int x, int y){
 	sq *p = snake;
 	while(p != NULL){
-		if(p -> x == x && p -> y == y) //Check for each case until p's x,y is equal to x,y
+		if( p -> y == y && p -> x == x) //Check for each case until p's x,y is equal to x,y
 			return -1.0; //return just 1 step form food
 		p = p -> nexploration_ratet;
+		cnt += 1;
+		if( cnt == 25)
+			return -1.0;
 	}
 	if(x > 18 || x < -18 || y > 18 || y < -18) return -1.0; //Border Case Decrement
 	return 1.0; //reached food
