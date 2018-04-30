@@ -73,7 +73,7 @@ int tmp0 = 50;
 
 bool down = false;
 
-int key1 = 3;
+int key1 = 4;
 
 bool neural_check = false;
 
@@ -92,6 +92,9 @@ char sScore0[15];
 char sSpeed[15];
 int Score = 0;
 int Score0 = 0;
+
+bool dead_snake=false;
+bool dead_snake0=false;
 
 void drawString(float x,float y,float z,void *font,const char *string)
 {
@@ -150,6 +153,14 @@ void start0(){
 	add0(4, 0);
 	mx0 = 1;
 	my0 = 0;
+}
+
+void pause(){
+	snake = NULL;
+}
+
+void pause0(){
+	snake0 = NULL;
 }
 
 
@@ -475,11 +486,15 @@ float reward(int sx, int sy, int sx1, int sy1){
 				fail_count++;
 		//}
 		sc = 0;
+		cout<<"AI dies"<<endl;
+		dead_snake=true;
 		start(); //restart
 		return -100000.0;
 	}else if(snake -> x > 17 || snake -> x < -17 || snake -> y > 17 || snake -> y < -17){
 		//border hit
 		sc = 0;
+		cout<<"AI dies"<<endl;
+		dead_snake=true;
         start();
 		fail_count++;
 		return -1000.0;
@@ -508,11 +523,15 @@ float reward0(int sx, int sy, int sx1, int sy1){
 		// 		fail_count++;
 		// }
 		sc0 = 0;
+		cout<<"Player dies"<<endl;
+		dead_snake0=true;
 		start0(); //restart
 		return -100000.0;
 	}else if(snake0 -> x > 17 || snake0 -> x < -17 || snake0 -> y > 17 || snake0 -> y < -17){
 		//border hit
 		sc0 = 0;
+		cout<<"Player dies"<<endl;
+		dead_snake0=true;
         start0();
 		fail_count0++;
 		return -1000.0;
@@ -573,12 +592,14 @@ void Tick(){
             break;
     }
 
-    move0();
+	if(!dead_snake0){
+		move0();
 
     sx1 = snake0 -> x; //takes the sx1 to snake value
 	sy1 = snake0 -> y;
 
 	float re = reward0(sx, sy, sx1, sy1);
+	}
 }
 
 void itera(){
@@ -634,10 +655,12 @@ void itera(){
 		new_q = out1[0];
 	}
 	get_q(sx1, sy1);
-    move();
+    if(!dead_snake){
+		move();
 
     sx1 = snake -> x;
 	sy1 = snake -> y;
+	}
 
     float dout[1];
 	float re = reward(sx, sy, sx1, sy1);
@@ -659,6 +682,23 @@ void par(float x1, float x2, float y1, float y2, float z1, float z2){
 	glColor3f(0.0,0.0,1.0);
 	glVertex3f(x2, y2, z1);
 	glColor3f(0.0,0.0,1.0);
+	glVertex3f(x1, y2, z1);
+
+	glEnd(); //Gl end
+}
+
+void pardead(float x1, float x2, float y1, float y2, float z1, float z2){
+	//glColor3f(0.3,0.56,0.84); //Blue
+
+	glBegin(GL_POLYGON); // Each set of 4 vertices form a quad from polygon
+
+	glColor3f(0.0,0.0,0.0);
+	glVertex3f(x1, y1, z1); // 3 GLfloat parameters
+	glColor3f(0.0,0.0,0.0);
+	glVertex3f(x2, y1, z1);
+	glColor3f(0.0,0.0,0.0);
+	glVertex3f(x2, y2, z1);
+	glColor3f(0.0,0.0,0.0);
 	glVertex3f(x1, y2, z1);
 
 	glEnd(); //Gl end
@@ -747,8 +787,7 @@ void DrawRules(){
 
 void welcome(){
 	glMatrixMode(GL_PROJECTION);
-	//glColor3f(0.3,0.56,0.84);   //welcome background
-	glColor3f(0.0,0.0,0.0);
+	glColor3f(0.0,0.0,0.0);   //welcome background
 
 	glBegin(GL_POLYGON);
 	glVertex3f(0.0,0.0,0.0);
@@ -766,41 +805,37 @@ void welcome(){
 	glColor3f(0.8,0.8,0.8);
 	glRectf(40,40,60,45);
 	glColor3f(0.0,0.2,0.0);
-	drawString(47,42,0,GLUT_BITMAP_HELVETICA_18,"PLAY");
+	drawString(43.5,42,0,GLUT_BITMAP_HELVETICA_18,"MAN vs AI MODE");
 
-	// // button 2 .. Network_play
-	// glColor3f(0.196,0.196,0.8);
-	// glRectf(39.5,29.5,60.5,35.5);
-
-	// glColor3f(0.8,0.8,0.8);
-	// glRectf(40,30,60,35);
-	// glColor3f(0.137,0.137,0.556);
-	// drawString(46,31,0,GLUT_BITMAP_HELVETICA_18,"NEURAL");
-
-	// button 3 .. How_to
-	glColor3f(0.4,0.6,0.4);  
+	// button 2 .. Network_play
+	glColor3f(0.4,0.6,0.4);
 	glRectf(39.5,29.5,60.5,35.5);
 
 	glColor3f(0.8,0.8,0.8);
 	glRectf(40,30,60,35);
-	// glColor3f(0.137,0.137,0.556);
 	glColor3f(0.0,0.2,0.0);
-	drawString(44,32,0,GLUT_BITMAP_HELVETICA_18,"INSTRUCTIONS");
+	drawString(42,31,0,GLUT_BITMAP_HELVETICA_18,"SINGLE PLAYER MODE");
 
-	// button 4 .. exit
-	// glColor3f(0.196,0.196,0.8);
-	glColor3f(0.4,0.6,0.4);  
+	// button 3 .. How_to
+	glColor3f(0.4,0.6,0.4);
 	glRectf(39.5,19.5,60.5,25.5);
+
 	glColor3f(0.8,0.8,0.8);
 	glRectf(40,20,60,25);
-	//glColor3f(0.137,0.137,0.556);
 	glColor3f(0.0,0.2,0.0);
-	drawString(47,22,0,GLUT_BITMAP_HELVETICA_18,"QUIT");
+	drawString(44,21,0,GLUT_BITMAP_HELVETICA_18,"INSTRUCTIONS");
+
+	// button 4 .. exit
+	glColor3f(0.4,0.6,0.4);
+	glRectf(39.5,9.5,60.5,15.5);
+	glColor3f(0.8,0.8,0.8);
+	glRectf(40,10,60,15);
+	glColor3f(0.0,0.2,0.0);
+	drawString(47,11,0,GLUT_BITMAP_HELVETICA_18,"QUIT");
 
 
 	glPushMatrix(); // Save model-view matrix setting
 
-	//glColor3f(0.8,0.8,0.8);
 	glColor3f(0.6,0.7,0.6); 
 	drawString(40,85,0,GLUT_BITMAP_TIMES_ROMAN_24,"ECE 6122 PROJECT ");
 	drawString(29,73,0,GLUT_BITMAP_TIMES_ROMAN_24,"SnakeBee: OpenGL based 2D Snake - Human vs AI");
@@ -860,6 +895,42 @@ void DrawScore()
     glFinish();
 }
 
+void DrawScoreSingle()
+{
+	glLineWidth(1.5f);
+    glColor3f (1.0,1.0,1.0);
+
+    glPushMatrix();
+    glTranslatef(SCREENW/(5.4), SCREENH/(1.05), 0);
+    glScalef(0.3f, 0.3f, 0.3f);
+    draw_string(GLUT_STROKE_ROMAN, "Your score:");
+    glPopMatrix();
+
+    sprintf(sScore, "%9d", sc0);
+
+    glPushMatrix();
+    glTranslatef(SCREENW/5, SCREENH/(1.05), 0);
+    glScalef(0.3f, 0.3f, 0.3f);
+    draw_string(GLUT_STROKE_ROMAN, sScore);
+    glPopMatrix();
+
+	glPushMatrix();
+    glTranslatef(SCREENW/(1.6), SCREENH/(1.05), 0);
+    glScalef(0.3f, 0.3f, 0.3f);
+    draw_string(GLUT_STROKE_ROMAN, "Your Speed:");
+    glPopMatrix();
+
+	sprintf(sSpeed, "%d", tmp);
+
+    glPushMatrix();
+    glTranslatef(SCREENW/1.2, SCREENH/(1.05), 0);
+    glScalef(0.3f, 0.3f, 0.3f);
+    draw_string(GLUT_STROKE_ROMAN, sSpeed);
+    glPopMatrix();
+
+    glFinish();
+}
+
 // void DrawNeural(){
 
     
@@ -905,43 +976,59 @@ void DrawScore()
 // 	par(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
 // }
 
-// void DrawUser(){
+void DrawUser(){
 	
-// 	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
-// 	glLoadIdentity();
-// 	gluOrtho2D (0, SCREENW, 0, SCREENH);
-// 	glClear(GL_COLOR_BUFFER_BIT);
+	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
+	glLoadIdentity();
+	gluOrtho2D (0, SCREENW, 0, SCREENH);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-// 	glBegin(GL_POLYGON);
-// 	glColor3f (0.0, 0.3, 0.0);
-// 	glVertex3f (0.0, 800.0, 0.0);
-// 	glColor3f (0.0, 0.11, 0.0);
-// 	glVertex3f (0, 700.0, 0.0);
-// 	glColor3f (0.0, 0.11, 0.0);
-// 	glVertex3f (1400.0, 700.0, 0.0);
-// 	glColor3f (0.0, 0.3, 0.0);
-// 	glVertex3f (1400.0, 800.0, 0.0);
+	glBegin(GL_POLYGON);
+	glColor3f (0.0, 0.0, 0.0);
+	glVertex3f (0.0, 800.0, 0.0);
+	glColor3f (0.0, 0.0, 0.0);
+	glVertex3f (0, 700.0, 0.0);
+	glColor3f (0.0, 0.0, 0.0);
+	glVertex3f (1400.0, 700.0, 0.0);
+	glColor3f (0.0, 0.0, 0.0);
+	glVertex3f (1400.0, 800.0, 0.0);
 
-// 	glEnd();
+	glEnd();
 
-// 	DrawScore();
+	DrawScoreSingle();
 	
-// 	glLoadIdentity ();
-// 	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
-// 	glTranslatef(10.0, 0.0, -28.0); // Translate by -22 on z-axis
+	glLoadIdentity ();
+	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
+	glTranslatef(0.0, 0.0, -28.0); // Translate by -22 on z-axis
 	
-// 	sq *p = snake;
-// 	par(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
-// 	par(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
-// 	par(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
-// 	par( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
+	sq *p = snake0;
+	parb(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
+	parb(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
+	parb(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
+	parb( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
 
-// 	while(p != NULL){
-// 		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
-// 		p = p -> nexploration_ratet; //p reach null nexplorartion
-// 	}
-// 	par(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
-// }
+	if(dead_snake0){
+	while(p != NULL){
+		pardead((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+		p = p -> nexploration_ratet; //p reach null nexplorartion
+	}
+	///// START OF the code WHICH  DISPLAYS THE RED SNAE DIES ON THE GAME 
+	glPushMatrix();
+	glColor3f (0.8, 0.0, 0.0);
+    glTranslatef(-8.0,-20.0, -28.0);
+    glScalef(0.02f, 0.02f, 0.02f);
+    draw_string(GLUT_STROKE_ROMAN, "Snake Dies :(");
+    glPopMatrix();
+	///// END OF the code WHICH  DISPLAYS THE RED SNAE DIES ON THE GAME 
+	}
+	else{
+	while(p != NULL){
+		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+		p = p -> nexploration_ratet; //p reach null nexplorartion
+	}
+	}
+	parfood(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
+}
 
 void DrawPlay(){
 	
@@ -964,7 +1051,6 @@ void DrawPlay(){
 
 	DrawScore();
 
-	
 	glLoadIdentity ();
 	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
 	glTranslatef(-10.0, 0.0, -28.0); // Translate by -22 on z-axis
@@ -977,13 +1063,19 @@ void DrawPlay(){
 	parb(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
 	parb( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
 
+	if(dead_snake0){
 	while(p != NULL){
+		pardead((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+		p = p -> nexploration_ratet; //p reach null nexplorartion
+	}
+	}
+	else{
+		while(p != NULL){
 		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
 		p = p -> nexploration_ratet; //p reach null nexplorartion
 	}
+	}
 	parfood(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
-
-
 
 	//DrawScore();
 
@@ -998,31 +1090,59 @@ void DrawPlay(){
 	parb(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
 	parb(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
 	parb( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
+	if(dead_snake){
 	while(p2 != NULL){
+		pardead((p2 -> x)/2.0,(p2 -> x)/2.0 + 0.4,(p2 -> y)/2.0,(p2 -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
+		p2 = p2 -> nexploration_ratet; //p reach null nexplorartion
+	}
+	}
+	else{
+		while(p2 != NULL){
 		par((p2 -> x)/2.0,(p2 -> x)/2.0 + 0.4,(p2 -> y)/2.0,(p2 -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
 		p2 = p2 -> nexploration_ratet; //p reach null nexplorartion
 	}
+	}
 	parfood(food_x2/2.0, food_x2/2.0 + 0.4 , food_y2/2.0 , food_y2/2.0 + 0.4, 0.0 , 0.0); //food decrement
+
+	///// START OF the code WHICH  DISPLAYS THE RED SNAE DIES ON THE GAME 
+	if(dead_snake0){
+	glPushMatrix();
+	glColor3f (0.8, 0.0, 0.0);
+    glTranslatef(-42.0,-20.0, -28.0);
+    glScalef(0.02f, 0.02f, 0.02f);
+    draw_string(GLUT_STROKE_ROMAN, "Player Snake Dies :(");
+    glPopMatrix();
+	}
+
+	if(dead_snake){
+    glPushMatrix();
+	glColor3f (0.8, 0.0, 0.0);
+    glTranslatef(1.0,-20.0, -28.0);
+    glScalef(0.02f, 0.02f, 0.02f);
+    draw_string(GLUT_STROKE_ROMAN, "AI Snake Dies :(");
+    glPopMatrix();
+	}
+	///// END OF the code WHICH  DISPLAYS THE RED SNAE DIES ON THE GAME 
 }
 
 void display(){
 
 	switch (key1)
     {
-       // case 1:
-         //   DrawUser();
-           // break;
-       // case 2:
-         //   DrawNeural();
-           // break;
-        case 3:
-            welcome();
-            break;
-        case 4:
-            DrawRules();
-            break;
 		case 1:
 		    DrawPlay();
+            break;
+        case 2:
+            DrawUser();
+			break;
+        // case 3:
+        //     DrawNeural();
+        //     break;
+        case 4:
+            welcome();
+            break;
+        case 5:
+            DrawRules();
             break;
 		
     }
@@ -1090,16 +1210,16 @@ void mouse(int button, int state, int ax, int ay)            // takes input from
 	down= button==GLUT_LEFT_BUTTON && state==GLUT_LEFT;
 	if(down)
     {
-        if (key1==3) //welcome
+        if (key1==4) //welcome
         {
-            if(mx > (40) && mx < (60) && my > (20) && my < (25) )  //exit button
+            if(mx > (40) && mx < (60) && my > (10) && my < (15) )  //exit button
             {
                 exit(0);
             }
-            if(mx > (40) && mx < (60) && my > (30) && my < (35) ) //how_to
+            if(mx > (40) && mx < (60) && my > (20) && my < (25) ) //how_to
             {
                 glClear(GL_COLOR_BUFFER_BIT);
-                key1=4;
+                key1=5;
 				display();
             }
             if(mx > (40) && mx < (60) && my > (40) && my < (45) ) //user
@@ -1110,17 +1230,17 @@ void mouse(int button, int state, int ax, int ay)            // takes input from
 				Score0 = 0;
                 display();
             }
-		//	if(mx > (40) && mx < (60) && my > (30) && my < (35) ) //neural_play
-          //  {
-            //    key1 = 2;
-             //   display();
-           // }
+			if(mx > (40) && mx < (60) && my > (30) && my < (35) ) //neural_play
+            {
+                key1 = 2;
+                display();
+            }
         }
-        if (key1==4) //back option in instruction
+        if (key1==5) //back option in instruction
         {
             if(mx > (40) && mx < (60) && my > (5) && my < (10) )
             {
-                key1=3;
+                key1=4;
                 glClear(GL_COLOR_BUFFER_BIT);
                 welcome();
             }
@@ -1135,8 +1255,9 @@ void timer(int = 0){
 		//Tick();
 		//cout << "iterations : " << iterations << " speed : " << tmp << " score : " << sc << endl;
 	}
-	// if (key1==2)
-	// 	Tick();
+	if (key1==2){
+	 	Tick();
+	}
 		//cout << "speed : " << tmp << " score : " << sc << endl;
 	glutPostRedisplay(); //marks the current window as needing to be redisplayed
 	glutTimerFunc(tmp, timer, 0); //registers a timer callback to be triggered in a specified number of milliseconds
@@ -1157,7 +1278,7 @@ void myReshape(int w, int h)
 	// Set the aspect ratio of the clipping area to match the viewport
     glMatrixMode(GL_PROJECTION); // To operate on the Projection matrix
 	glLoadIdentity(); // Reset the model-view matrix
-	if (key1 == 3){
+	if (key1 == 4){
 		glOrtho(0.0, 100.0, 0.0, 100.0,	-5.0 , 10.0);
 	}
 
