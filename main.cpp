@@ -228,6 +228,7 @@ void init(){
 
 float check(int x, int y){
 	sq *p = snake;
+	cnt = 0;
 	while(p != NULL){
 		if( p -> y == y && p -> x == x) //Check for each case until p's x,y is equal to x,y
 			return -1.0; //return just 1 step form food
