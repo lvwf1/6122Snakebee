@@ -234,7 +234,7 @@ float check(int x, int y){
 		p = p -> nexploration_ratet;
 		cnt += 1;
 		cout<<"Check Body No."<<cnt<<endl;
-		if( cnt == 20)
+		if( cnt == 25)
 			return -1.0;
 	}
 	if(x > 18 || x < -18 || y > 18 || y < -18) return -1.0; //Border Case Decrement
