@@ -234,8 +234,8 @@ float check(int x, int y){
 			return -1.0; //return just 1 step form food
 		p = p -> nexploration_ratet;
 		cnt += 1;
-		cout<<"Check Body No."<<cnt<<endl;
-		if( cnt == sc*2-2)
+		// cout<<"Check Body No."<<cnt<<endl; Check Body Count
+		if( cnt == sc*2-3)
 			return -1.0;
 	}
 	if(x > 18 || x < -18 || y > 18 || y < -18) return -1.0; //Border Case Decrement
