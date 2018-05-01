@@ -233,6 +233,7 @@ float check(int x, int y){
 			return -1.0; //return just 1 step form food
 		p = p -> nexploration_ratet;
 		cnt += 1;
+		cout<<"Check Body No."<<cnt<<endl;
 		if( cnt == 20)
 			return -1.0;
 	}
