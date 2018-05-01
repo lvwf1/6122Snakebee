@@ -233,7 +233,7 @@ float check(int x, int y){
 			return -1.0; //return just 1 step form food
 		p = p -> nexploration_ratet;
 		cnt += 1;
-		if( cnt == 25)
+		if( cnt == 20)
 			return -1.0;
 	}
 	if(x > 18 || x < -18 || y > 18 || y < -18) return -1.0; //Border Case Decrement
