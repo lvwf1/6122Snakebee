@@ -28,19 +28,17 @@ typedef struct sq{
 	struct sq *nexploration_ratet;
 } sq;
 
-sq *snake = NULL;
-sq *snake0 = NULL;
+sq *snake_player= NULL;
+sq *snake_ai = NULL;
+
 neural *net;
 
+// configuration for neural network
 int num_layers = 2;
 int num_inputs = 6;
 int num_outputs = 1;
-
-float learning_rate = 1e-7;
-
-//bool  pus        =  false; //push button for keyboard hit
-
 int iterations = 0;
+float learning_rate = 1e-7;
 
 int	  exploration_rate = 40;
 
@@ -63,22 +61,12 @@ int fail_count0 = 0;
 int sc0 = 0;
 
 float old_q = 0.0;
-float old_q0 = 0.0;
 int tmp = 50;
-int tmp0 = 50;
-
-//int wa,ha;
-
-//int SCREENH=(25*30),SCREENW=(25*50);
-//int SCREENH=450,SCREENW=450;
 
 bool down = false;
 
 int key1 = 4;
 
-bool neural_check = false;
-
-int dir;
 int dir_user;
 
 int Scale = 25;
@@ -86,13 +74,9 @@ int N = 50, M = 30;
 int SCREENW = Scale * N;
 int SCREENH = Scale * M;
 
-int num = 7;
-
 char sScore[15];
 char sScore0[15];
 char sSpeed[15];
-int Score = 0;
-int Score0 = 0;
 
 bool dead_snake=false;
 bool dead_snake0=false;
@@ -114,70 +98,57 @@ void draw_string(void *font, const char* string)
         glutStrokeCharacter(font, *string++);
 }
 
-void add(int x, int y){
-	sq *tmp = (sq *)malloc(sizeof(sq)); // Start sq snake tmp with Memory Allocation
+void add_player(int x, int y){
+	sq *tmp = (sq *)malloc(sizeof(sq)); // Start sq snake_player tmp with Memory Allocation
 	tmp -> x = x;
 	tmp -> y = y;
 	tmp -> mx = 1;
 	tmp -> my = 0;
-	tmp -> nexploration_ratet = snake;
-	snake = tmp;
+	tmp -> nexploration_ratet = snake_player;
+	snake_player = tmp;
 }
 
-void add0(int x, int y){
-	sq *tmp0 = (sq *)malloc(sizeof(sq)); // Start sq snake tmp with Memory Allocation
+void add_ai(int x, int y){
+	sq *tmp0 = (sq *)malloc(sizeof(sq)); // Start sq snake_player tmp with Memory Allocation
 	tmp0 -> x = x;
 	tmp0 -> y = y;
 	tmp0 -> mx = 1;
 	tmp0 -> my = 0;
-	tmp0 -> nexploration_ratet = snake0;
-	snake0 = tmp0;
+	tmp0 -> nexploration_ratet = snake_ai;
+	snake_ai = tmp0;
 }
 
-void start(){
-	snake = NULL;
-    add(0, 0);
-	add(1, 0);
-	add(2, 0);
-	add(3, 0);
-	add(4, 0);
+void start_player(){
+	snake_player = NULL;
+    add_player(0, 0);
+    add_player(1, 0);
+    add_player(2, 0);
+    add_player(3, 0);
+    add_player(4, 0);
 	mx = 1;
 	my = 0;
 }
 
-void start0(){
-	snake0 = NULL;
-    add0(0, 0);
-	add0(1, 0);
-	add0(2, 0);
-	add0(3, 0);
-	add0(4, 0);
+void start_ai(){
+	snake_ai = NULL;
+    add_ai(0, 0);
+    add_ai(1, 0);
+    add_ai(2, 0);
+    add_ai(3, 0);
+    add_ai(4, 0);
 	mx0 = 1;
 	my0 = 0;
 }
 
-void pause(){
-	snake = NULL;
-}
-
-void pause0(){
-	snake0 = NULL;
-}
-
-
-
-void set_f(){ //Setup food x,y cordinate and then make the snake p to move towards it's cordinate
+void set_f_player(){ //Setup food x,y cordinate and then make the snake_player p to move_player towards it's cordinate
 	bool f = true;
 	while(f){
 		srand(time(NULL));
 		food_x2 = (rand() % 34) - 17;
 		srand(time(NULL));
 		food_y2 = (rand() % 34) - 17;
-		
-		//food_x2 = food_x;
-		//food_y2 = food_y;
 
-		sq *p = snake; //take add(4,0) value
+		sq *p = snake_player; //take add_player(4,0) value
 
 		while(p != NULL){ //fetch null 
 			if(p -> x == food_x2 && p -> y == food_y2){ //if value of p is same as food
@@ -187,21 +158,10 @@ void set_f(){ //Setup food x,y cordinate and then make the snake p to move towar
 			f = false;
 			p = p -> nexploration_ratet;
 		}
-
-		// sq *p2 = snake0; //take add(4,0) value
-		
-		// while(p2 != NULL){ //fetch null 
-		// 	if(p2 -> x == food_x2 && p2 -> y == food_y2){ //if value of p is same as food
-		// 		f = true;
-		// 		break;
-		// 	}
-		// 	f = false;
-		// 	p2 = p2 -> nexploration_ratet;
-		// }
 	}
 }
 
-void set_f0(){ //Setup food x,y cordinate and then make the snake p to move towards it's cordinate
+void set_f_ai(){ //Setup food x,y cordinate and then make the snake_player p to move_player towards it's cordinate
 	bool f = true;
 	while(f){
 		srand(time(NULL));
@@ -209,7 +169,7 @@ void set_f0(){ //Setup food x,y cordinate and then make the snake p to move towa
 		srand(time(NULL));
 		food_y = (rand() % 34) - 17;
 
-		sq *p2 = snake0; //take add(4,0) value
+		sq *p2 = snake_ai; //take add_player(4,0) value
 		while(p2 != NULL){ //fetch null 
 			if(p2 -> x == food_x && p2 -> y == food_y){ //if value of p is same as food
 				f = true;
@@ -227,18 +187,18 @@ void init(){
 }
 
 float check(int x, int y){
-	sq *p = snake;
+	sq *p = snake_player;
 	cnt = 0;
 	while(p != NULL){
 		if( p -> y == y && p -> x == x) //Check for each case until p's x,y is equal to x,y
-			return -1.0; //return just 1 step form food
+			return -1.0f; //return just 1 step form food
 		p = p -> nexploration_ratet;
 		cnt += 1;
 		// cout<<"Check Body No."<<cnt<<endl; Check Body Count
 		if( cnt == sc*2-3)
-			return -1.0;
+			return -1.0f;
 	}
-	if(x > 18 || x < -18 || y > 18 || y < -18) return -1.0; //Border Case Decrement
+	if(x > 18 || x < -18 || y > 18 || y < -18) return -1.0f; //Border Case Decrement
 	return 1.0; //reached food
 }
 
@@ -253,9 +213,9 @@ float *get_q(int sx, int sy){
 	return net -> feed(inputs); //Send Feed inputs
 }
 
-void rev(){
+void rev_player(){
 	sq *snake2 = NULL;
-	sq *p = snake;
+	sq *p = snake_player;
 	while(p != NULL){
 		sq *tmp = (sq *)malloc(sizeof(sq));
 		tmp -> x = p -> x;
@@ -268,14 +228,14 @@ void rev(){
 		free(p); //Memory Unallocate of P
 		p = x; //put p=x
 	}
-	snake = snake2;
-	mx = snake -> mx;
-	my = snake -> my;
+	snake_player = snake2;
+	mx = snake_player -> mx;
+	my = snake_player -> my;
 }
 
-void rev0(){
+void rev_ai(){
 	sq *snake3 = NULL;
-	sq *p = snake0;
+	sq *p = snake_ai;
 	while(p != NULL){
 		sq *tmp0 = (sq *)malloc(sizeof(sq));
 		tmp0 -> x = p -> x;
@@ -288,9 +248,9 @@ void rev0(){
 		free(p); //Memory Unallocate of P
 		p = x; //put p=x
 	}
-	snake0 = snake3;
-	mx0 = snake0 -> mx;
-	my0 = snake0 -> my;
+	snake_ai = snake3;
+	mx0 = snake_ai -> mx;
+	my0 = snake_ai -> my;
 }
 
 float max_q(int sx, int sy, int food_x, int food_y){
@@ -318,14 +278,14 @@ float max_q(int sx, int sy, int food_x, int food_y){
 		if(out1[0] > out3[0]){
 			if(out1[0] > out4[0]){
 				new_q = out1[0];
-				if(mx == -1) rev();
+				if(mx == -1) rev_player();
 				else{
 					mx =  1;
 					my =  0;
 				}
 			}else{
 				new_q = out4[0];
-				if(my == 1) rev();
+				if(my == 1) rev_player();
 				else{
 					mx =  0;
 					my = -1;
@@ -334,14 +294,14 @@ float max_q(int sx, int sy, int food_x, int food_y){
 		}else{
 			if(out3[0] > out4[0]){
 				new_q = out3[0];
-				if(my == -1) rev();
+				if(my == -1) rev_player();
 				else{
 					mx =  0;
 					my =  1;
 				}
 			}else{
 				new_q = out4[0];
-				if(my == 1) rev();
+				if(my == 1) rev_player();
 				else{
 					mx =  0;
 					my = -1;
@@ -352,14 +312,14 @@ float max_q(int sx, int sy, int food_x, int food_y){
 		if(out2[0] > out3[0]){
 			if(out2[0] > out4[0]){
 				new_q = out2[0];
-				if(mx == 1) rev();
+				if(mx == 1) rev_player();
 				else{
 					mx = -1;
 					my =  0;
 				}
 			}else{
 				new_q = out4[0];
-				if(my == 1) rev();
+				if(my == 1) rev_player();
 				else{
 					mx =  0;
 					my = -1;
@@ -368,14 +328,14 @@ float max_q(int sx, int sy, int food_x, int food_y){
 		}else{
 			if(out3[0] > out4[0]){
 				new_q = out3[0];
-				if(my == -1) rev();
+				if(my == -1) rev_player();
 				else{
 					mx =  0;
 					my =  1;
 				}
 			}else{
 				new_q = out4[0];
-				if(my == 1) rev();
+				if(my == 1) rev_player();
 				else{
 					mx =  0;
 					my = -1;
@@ -387,8 +347,8 @@ float max_q(int sx, int sy, int food_x, int food_y){
 
 }
 
-void move(){
-	sq *p = snake;
+void move_player(){
+	sq *p = snake_player;
 	int x = p -> x;
 	int y = p -> y;
 	int tmx = p -> mx;
@@ -413,15 +373,15 @@ void move(){
 
 		p = p -> nexploration_ratet;
 	}
-	snake -> mx = mx;
-	snake -> my = my;
-	snake -> x += mx; //Add with mx value depending un up down left right movement
-	snake -> y += my;
+	snake_player -> mx = mx;
+	snake_player -> my = my;
+	snake_player -> x += mx; //Add with mx value depending un up down left right movement
+	snake_player -> y += my;
     // Setup increment case from x to mx within nexploration_ratet
 }
 
-void move0(){
-	sq *p = snake0;
+void move_ai(){
+	sq *p = snake_ai;
 	int x = p -> x;
 	int y = p -> y;
 	int tmx = p -> mx;
@@ -446,64 +406,60 @@ void move0(){
 
 		p = p -> nexploration_ratet;
 	}
-	snake0 -> mx = mx0;
-	snake0 -> my = my0;
-	snake0 -> x += mx0; //Add with mx value depending un up down left right movement
-	snake0 -> y += my0;
+	snake_ai -> mx = mx0;
+	snake_ai -> my = my0;
+	snake_ai -> x += mx0; //Add with mx value depending un up down left right movement
+	snake_ai -> y += my0;
     // Setup increment case from x to mx within nexploration_ratet
 }
 
 
-bool tail(){
-	sq *p = snake;
-    //tail is touched by head
+bool tail_player(){
+	sq *p = snake_player;
+    //tail_player is touched by head
 	while(p -> nexploration_ratet != NULL){
-		if(p -> nexploration_ratet -> x == snake -> x && p -> nexploration_ratet -> y == snake -> y)
+		if(p -> nexploration_ratet -> x == snake_player -> x && p -> nexploration_ratet -> y == snake_player -> y)
 			return true;
 		p = p -> nexploration_ratet;
 	}
 	return false;
 }
 
-bool tail0(){
-	sq *p = snake0;
-    //tail is touched by head
+bool tail_ai(){
+	sq *p = snake_ai;
+    //tail_ai is touched by head
 	while(p -> nexploration_ratet != NULL){
-		if(p -> nexploration_ratet -> x == snake0 -> x && p -> nexploration_ratet -> y == snake0 -> y)
+		if(p -> nexploration_ratet -> x == snake_ai -> x && p -> nexploration_ratet -> y == snake_ai -> y)
 			return true;
 		p = p -> nexploration_ratet;
 	}
 	return false;
 }
 
-float reward(int sx, int sy, int sx1, int sy1){
-	if(snake -> x == food_x2 && snake -> y == food_y2){
-		//if (neural_check){
+float reward_player(int sx, int sy, int sx1, int sy1){
+	if(snake_player -> x == food_x2 && snake_player -> y == food_y2){
 			fail_count = 0;
 			exploration_rate = exploration_rate / 3; //Rate decrement by 1/3 from 40%
-		//}
-		add(food_x2, food_y2);//Add value to tail with additional quad
-		set_f();
+        add_player(food_x2, food_y2);//Add value to tail_player with additional quad
+        set_f_player();
 		sc++; //Increment sc by 1
 		return 1000.0;
-	}else if(tail()){
-			//if (neural_check){
+	}else if(tail_player()){
 				fail_count = 0;
 				fail_count++;
-		//}
 		sc = 0;
 		cout<<"AI dies"<<endl;
 		dead_snake=true;
-		start(); //restart
-		return -100000.0;
-	}else if(snake -> x > 17 || snake -> x < -17 || snake -> y > 17 || snake -> y < -17){
+        start_player(); //restart
+		return -100000.0f;
+	}else if(snake_player -> x > 17 || snake_player -> x < -17 || snake_player -> y > 17 || snake_player -> y < -17){
 		//border hit
 		sc = 0;
 		cout<<"AI dies"<<endl;
 		dead_snake=true;
-        start();
+        start_player();
 		fail_count++;
-		return -1000.0;
+		return -1000.0f;
 	}
 	if(fail_count > 50){
         //decrease exploration_rate for hish fail_count
@@ -513,34 +469,26 @@ float reward(int sx, int sy, int sx1, int sy1){
 	return -re2;
 }
 
-float reward0(int sx, int sy, int sx1, int sy1){
-	if(snake0 -> x == food_x && snake0 -> y == food_y){
-		// if (neural_check){
-		// 	fail_count = 0;
-		// 	exploration_rate = exploration_rate / 3; //Rate decrement by 1/3 from 40%
-		// }
-		add0(food_x, food_y);//Add value to tail with additional quad
-		set_f0();
+float reward_ai(int sx, int sy, int sx1, int sy1){
+	if(snake_ai -> x == food_x && snake_ai -> y == food_y){
+        add_ai(food_x, food_y);//Add value to tail_player with additional quad
+        set_f_ai();
 		sc0++; //Increment sc by 1
 		return 1000.0;
-	}else if(tail0()){
-		// 	if (neural_check){
-		// 		fail_count = 0;
-		// 		fail_count++;
-		// }
+	}else if(tail_ai()){
 		sc0 = 0;
 		cout<<"Player dies"<<endl;
 		dead_snake0=true;
-		start0(); //restart
-		return -100000.0;
-	}else if(snake0 -> x > 17 || snake0 -> x < -17 || snake0 -> y > 17 || snake0 -> y < -17){
+        start_ai(); //restart
+		return -100000.0f;
+	}else if(snake_ai -> x > 17 || snake_ai -> x < -17 || snake_ai -> y > 17 || snake_ai -> y < -17){
 		//border hit
 		sc0 = 0;
 		cout<<"Player dies"<<endl;
 		dead_snake0=true;
-        start0();
+        start_ai();
 		fail_count0++;
-		return -1000.0;
+		return -1000.0f;
 	}
 	if(fail_count0 > 50){
         //decrease exploration_rate for hish fail_count
@@ -552,8 +500,8 @@ float reward0(int sx, int sy, int sx1, int sy1){
 
 void Tick(){
 	iterations++; //Increment iterations
-    int sx = snake0 -> x;
-	int sy = snake0 -> y;
+    int sx = snake_ai -> x;
+	int sy = snake_ai -> y;
 
 	int sx1 = sx;
 	int sy1 = sy;
@@ -563,7 +511,7 @@ void Tick(){
         case 0:
             sx1 = sx;
 			sy1 = sy + 1;
-			if(my0 == -1) rev0();
+			if(my0 == -1) rev_ai();
 			else{
 				mx0 = 0;
 				my0 = 1;
@@ -572,7 +520,7 @@ void Tick(){
         case 1:
             sx1 = sx - 1;
 			sy1 = sy;
-			if(mx0 == 1) rev0();
+			if(mx0 == 1) rev_ai();
 			else{
 				mx0 = -1;
 				my0 = 0;
@@ -581,7 +529,7 @@ void Tick(){
         case 2:
             sx1 = sx + 1;
 			sy1 = sy;
-			if(mx0 == -1) rev0();
+			if(mx0 == -1) rev_ai();
 			else{
 				mx0 = 1;
 				my0 = 0;
@@ -590,7 +538,7 @@ void Tick(){
         case 3:
             sx1 = sx;
 			sy1 = sy - 1;
-			if(my0 == 1) rev0();
+			if(my0 == 1) rev_ai();
 			else{
 				mx0 = 0;
 				my0 = -1;
@@ -599,19 +547,19 @@ void Tick(){
     }
 
 	if(!dead_snake0){
-		move0();
+        move_ai();
 
-    sx1 = snake0 -> x; //takes the sx1 to snake value
-	sy1 = snake0 -> y;
+    sx1 = snake_ai -> x; //takes the sx1 to snake_player value
+	sy1 = snake_ai -> y;
 
-	float re = reward0(sx, sy, sx1, sy1);
+	float re = reward_ai(sx, sy, sx1, sy1);
 	}
 }
 
 void itera(){
 	iterations++; //Increment iterations
-	int sx = snake -> x; //takes (4,0) value initially
-	int sy = snake -> y;
+	int sx = snake_player -> x; //takes (4,0) value initially
+	int sy = snake_player -> y;
 
 	float inputs[6];
 	int sx1 = sx;
@@ -626,7 +574,7 @@ void itera(){
 		if(a == 0){
 			sx1 = sx + 1;
 			sy1 = sy;
-			if(mx == -1) rev();
+			if(mx == -1) rev_player();
 			else{
 				mx =  1;
 				my =  0;
@@ -634,7 +582,7 @@ void itera(){
 		}else if(a == 1){
 			sx1 = sx - 1;
 			sy1 = sy;
-			if(mx == 1) rev();
+			if(mx == 1) rev_player();
 			else{
 				mx = -1;
 				my =  0;
@@ -642,7 +590,7 @@ void itera(){
 		}else if(a == 2){
 			sx1 = sx;
 			sy1 = sy + 1;
-			if(my == -1) rev();
+			if(my == -1) rev_player();
 			else{
 				mx =  0;
 				my =  1;
@@ -650,7 +598,7 @@ void itera(){
 		}else{
 			sx1 = sx;
 			sy1 = sy - 1;
-			if(my == 1) rev();
+			if(my == 1) rev_player();
 			else{
 				mx =  0;
 				my = -1;
@@ -662,14 +610,14 @@ void itera(){
 	}
 	get_q(sx1, sy1);
     if(!dead_snake){
-		move();
+        move_player();
 
-    sx1 = snake -> x;
-	sy1 = snake -> y;
+    sx1 = snake_player -> x;
+	sy1 = snake_player -> y;
 	}
 
     float dout[1];
-	float re = reward(sx, sy, sx1, sy1);
+	float re = reward_player(sx, sy, sx1, sy1);
 
 	dout[0] =  re + 0.9 * new_q - old_q;
 	net -> learn(dout);
@@ -783,8 +731,8 @@ void DrawRules(){
 		drawString(23,52,0,GLUT_BITMAP_HELVETICA_18,"- The right window is neural AI player");
 		drawString(23,48,0,GLUT_BITMAP_HELVETICA_18,"- The left window is Human player");
 		drawString(23,44,0,GLUT_BITMAP_HELVETICA_18,"- Food is a grey spot which appears randomly on the screens");
-		drawString(23,40,0,GLUT_BITMAP_HELVETICA_18,"- If snake hits it's body or boundary:restart");
-		drawString(23,36,0,GLUT_BITMAP_HELVETICA_18,"- Use the arrow keys to control snake's movement");
+		drawString(23,40,0,GLUT_BITMAP_HELVETICA_18,"- If snake_player hits it's body or boundary:restart");
+		drawString(23,36,0,GLUT_BITMAP_HELVETICA_18,"- Use the arrow keys to control snake_player's movement");
 		drawString(23,32,0,GLUT_BITMAP_HELVETICA_18,"- AI vs Human, the higher score wins");
 		drawString(42,25,0,GLUT_BITMAP_HELVETICA_18," ENJOY THE GAME");
 
@@ -937,51 +885,6 @@ void DrawScoreSingle()
     glFinish();
 }
 
-// void DrawNeural(){
-
-    
-// 	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
-// 	glLoadIdentity();
-// 	//SCREENW = SCREENW/(1.2);
-// 	//SCREENH = SCREENH/(1.05);
-// 	gluOrtho2D (0, SCREENW, 0, SCREENH);
-// 	glClear(GL_COLOR_BUFFER_BIT);
-
-// 	glBegin(GL_POLYGON);
-// 	glColor3f (0.0, 0.3, 0.0);
-// 	glVertex3f (0.0, 800.0, 0.0);
-// 	glColor3f (0.0, 0.11, 0.0);
-// 	glVertex3f (0, 700.0, 0.0);
-// 	glColor3f (0.0, 0.11, 0.0);
-// 	glVertex3f (1400.0, 700.0, 0.0);
-// 	glColor3f (0.0, 0.3, 0.0);
-// 	glVertex3f (1400.0, 800.0, 0.0);
-
-// 	glEnd();
-
-// 	DrawScore();
-
-// 	neural_check = true;
-
-// 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the color buffer and depth buffer
-// 	glLoadIdentity ();
-// 	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
-// 	//gluLookAt(0.0, 0.0, 5.0,0.0, 0.0, 0.0,0.0, 1.0, 0.0); 
-
-// 	glTranslatef(-10.0, 0.0, -28.0); // Translate by -22 on z-axis
-// 	//glTranslatef(SCREENW/(2), SCREENH/(2), 0);
-// 	sq *p = snake;
-// 	par(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
-// 	par(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
-// 	par(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
-// 	par( 9.2,  9.0, -8.7,  9.2, 0.0, 0.0);
-// 	while(p != NULL){
-// 		par((p -> x)/2.0,(p -> x)/2.0 + 0.4,(p -> y)/2.0,(p -> y)/2.0 + 0.4, 0.0, 0.0); //decrement
-// 		p = p -> nexploration_ratet; //p reach null nexplorartion
-// 	}
-// 	par(food_x/2.0, food_x/2.0 + 0.4 , food_y/2.0 , food_y/2.0 + 0.4, 0.0 , 0.0); //food decrement
-// }
-
 void DrawUser(){
 	
 	glClearColor(0.0, 0.18, 0.0, 0); //BG-color
@@ -1007,7 +910,7 @@ void DrawUser(){
 	gluPerspective(45.0, (float)SCREENW/(float)SCREENH, 0.1f, 200.0);
 	glTranslatef(0.0, 0.0, -28.0); // Translate by -22 on z-axis
 	
-	sq *p = snake0;
+	sq *p = snake_ai;
 	parb(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
 	parb(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
 	parb(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
@@ -1062,7 +965,7 @@ void DrawPlay(){
 	glTranslatef(-10.0, 0.0, -28.0); // Translate by -22 on z-axis
 	
 	
-	sq *p = snake0;
+	sq *p = snake_ai;
 	
 	parb(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
 	parb(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
@@ -1091,7 +994,7 @@ void DrawPlay(){
 	//gluLookAt(0.0, 0.0, 5.0,0.0, 0.0, 0.0,0.0, 1.0, 0.0); 
 
 	glTranslatef(9.3, 0.0, -28.0); // Translate by -22 on z-axis
-	sq *p2 = snake;
+	sq *p2 = snake_player;
 	parb(-8.7,  9.2,  9.0,  9.2, 0.0, 0.0);
 	parb(-8.7,  9.2, -8.5, -8.7, 0.0, 0.0);
 	parb(-8.5, -8.7, -8.7,  9.2, 0.0, 0.0);
@@ -1190,7 +1093,7 @@ void keyboard(unsigned char key, int a, int b) {
             dir = 3;
             break;
         case 'f': //set other food cordinate
-            set_f();
+            set_f_player();
             break;
         case 'o': //decrease timer
             tmp--;
@@ -1200,7 +1103,7 @@ void keyboard(unsigned char key, int a, int b) {
             tmp++;
             break;
 		case 'r': //restart
-			start();
+            start_player();
 			sc =0; tmp = 50;
             break;
         case 27:
@@ -1298,10 +1201,10 @@ int main(int argc, char** argv){
 	net = new neural(num_inputs, num_outputs, num_layers, 10, learning_rate); //Send neural with initial values
 	net -> init(); //reach neural_init
 
-	start(); //Start snake layout with initial values
-    start0();
-    set_f(); //Setup food point cordinates
-	set_f0(); //Setup food point cordinates
+    start_player(); //Start snake_player layout with initial values
+    start_ai();
+    set_f_player(); //Setup food point cordinates
+    set_f_ai(); //Setup food point cordinates
 
     glutInit(&argc, argv); // Initialize GLUT
 
