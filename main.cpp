@@ -198,9 +198,9 @@ float check(int x, int y){
 			return -1.0f; //return just 1 step form food
 		p = p -> nexploration_ratet;
 		cnt += 1;
-		// cout<<"Check Body No."<<cnt<<endl; Check Body Count
-		if( cnt == sc*2-3)
-			return -1.0f;
+		//cout<<"Check Body No."<<cnt<<endl; Check Body Count
+		//if( cnt == sc*2-4)
+			//return -1.0f;
 	}
 	if(x > 18 || x < -18 || y > 18 || y < -18) return -1.0f; //Border Case Decrement
 	return 1.0; //reached food
