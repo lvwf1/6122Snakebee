@@ -49,6 +49,10 @@ int food_x2 = -6;
 int food_y2 = -6;
 
 int cnt = 0; // Check Body
+int dir;
+int num = 7;
+int Score;
+int Score0;
 
 int mx;
 int my;
