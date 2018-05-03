@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 # Project Name
 PROJECT(6122Snakebee)
 
+
+#########################################################
+# COPY NEURAL WEIGHTS FILE
+#########################################################
+FILE(COPY ${CMAKE_CURRENT_SOURCE_DIR}/weights.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 #########################################################
 # FIND GLUT
 #########################################################
