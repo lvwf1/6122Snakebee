@@ -1,4 +1,9 @@
 # 6122Snakebee
+
+Prerequisite: Linux or Mac operating system. Make sure that your system has Opengl, Glut/ FreeGlut and respective Mesa 3d Graphics Library installed and functioning. 
+
+Procedure on Linux: 
+
 Step 1 open ubuntu
 
 Step 2 open terminal
